@@ -1,5 +1,4 @@
-const Autotask = require('defender-autotask-client');
-const { logMessage } = require('./util');
+const { logMessage, getAutotaskClient } = require('./util');
 
 class DefenderDeploy {
   constructor(serverless, options) {
@@ -14,9 +13,7 @@ class DefenderDeploy {
   async deploy() {
     const serverless = this.serverless;
     logMessage(serverless, 'Running Defender Deploy');
-    const apiKey = process.env.API_KEY;
-    const apiSecret = process.env.API_SECRET;
-    const client = new Autotask.AutotaskClient({ apiKey, apiSecret });
+    const client = getAutotaskClient();
     const existing = await client.list().then(r => r.items);
     const functions = serverless.service.functions;
     for (const [_fname, fn] of Object.entries(functions)) {
