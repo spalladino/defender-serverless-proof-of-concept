@@ -4,7 +4,6 @@ frameworkVersion: '3'
 
 provider:
   name: defender
-  runtime: nodejs14.x
 
 functions:
   hello:
