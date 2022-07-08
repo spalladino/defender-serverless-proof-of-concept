@@ -1,0 +1,15 @@
+service: defender-test-project
+
+frameworkVersion: '3'
+
+provider:
+  name: defender
+  runtime: nodejs14.x
+
+functions:
+  hello:
+    name: 'Hello world from serverless'
+    path: './hello-world'
+
+plugins:
+  - ../defender-serverless
