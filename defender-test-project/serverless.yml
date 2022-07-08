@@ -1,4 +1,5 @@
 service: defender-test-project
+configValidationMode: off
 
 frameworkVersion: '3'
 
@@ -12,3 +13,5 @@ functions:
 
 plugins:
   - ../defender-serverless
+
+
