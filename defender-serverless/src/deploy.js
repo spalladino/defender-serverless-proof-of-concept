@@ -11,22 +11,28 @@ class DefenderDeploy {
   }
 
   async deploy() {
-    console.log('Defender Deploy');
+    console.log('Running Defender Deploy');
     const apiKey = process.env.API_KEY;
     const apiSecret = process.env.API_SECRET;
     const client = new Autotask.AutotaskClient({ apiKey, apiSecret });
     const serverless = this.serverless;
     const functions = serverless.service.functions;
+    const existing = await client.list().then(r => r.items);
     for (const [_fname, fn] of Object.entries(functions)) {
-      const autotask = await client.create({
-        name: fn.name,
-        trigger: { type: 'webhook' },
-        encodedZippedCode: await client.getEncodedZippedCodeFromFolder(fn.path),
-        paused: false,
-      });
-      console.log(`Created autotask ${autotask.autotaskId}`);
+      const match = existing.find(e => e.name === fn.name);
+      if (match) {
+        await client.updateCodeFromFolder(match.autotaskId, fn.path);
+        console.log(`Updated autotask ${match.autotaskId}`);
+      } else {
+        const autotask = await client.create({
+          name: fn.name,
+          trigger: { type: 'webhook' },
+          encodedZippedCode: await client.getEncodedZippedCodeFromFolder(fn.path),
+          paused: false,
+        });
+        console.log(`Created autotask ${autotask.autotaskId}`);
+      }
     }
-    
   }
 }
 
