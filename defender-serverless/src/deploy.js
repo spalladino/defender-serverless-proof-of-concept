@@ -1,4 +1,5 @@
 const Autotask = require('defender-autotask-client');
+const { logMessage } = require('./util');
 
 class DefenderDeploy {
   constructor(serverless, options) {
@@ -11,18 +12,18 @@ class DefenderDeploy {
   }
 
   async deploy() {
-    console.log('Running Defender Deploy');
+    const serverless = this.serverless;
+    logMessage(serverless, 'Running Defender Deploy');
     const apiKey = process.env.API_KEY;
     const apiSecret = process.env.API_SECRET;
     const client = new Autotask.AutotaskClient({ apiKey, apiSecret });
-    const serverless = this.serverless;
-    const functions = serverless.service.functions;
     const existing = await client.list().then(r => r.items);
+    const functions = serverless.service.functions;
     for (const [_fname, fn] of Object.entries(functions)) {
       const match = existing.find(e => e.name === fn.name);
       if (match) {
         await client.updateCodeFromFolder(match.autotaskId, fn.path);
-        console.log(`Updated autotask ${match.autotaskId}`);
+        logMessage(serverless, `Updated autotask code '${match.name}' (${match.autotaskId})`);
       } else {
         const autotask = await client.create({
           name: fn.name,
@@ -30,7 +31,7 @@ class DefenderDeploy {
           encodedZippedCode: await client.getEncodedZippedCodeFromFolder(fn.path),
           paused: false,
         });
-        console.log(`Created autotask ${autotask.autotaskId}`);
+        logMessage(serverless, `Created autotask '${match.name}' (${autotask.autotaskId})`);
       }
     }
   }
