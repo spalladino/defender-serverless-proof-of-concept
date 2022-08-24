@@ -1,4 +1,4 @@
-const { logMessage, getAutotaskClient } = require('./util');
+const { logMessage, getAutotaskClient, getSentinelClient } = require('./util');
 
 class DefenderDeploy {
   constructor(serverless, options) {
@@ -10,9 +10,23 @@ class DefenderDeploy {
     };
   }
 
-  async deploy() {
+  async deploySentinels() {
     const serverless = this.serverless;
-    logMessage(serverless, 'Running Defender Deploy');
+    const client = getSentinelClient();
+    const existing = await client.list().then(r => r.items);
+    const sentinels = serverless.service.resources.sentinels;
+
+    for (const [_sname, sentinel] of Object.entries(sentinels)) {
+      const match = existing.find(e => e.name === sentinel.name);
+      if (match) {
+        logMessage(serverless, `Updating sentinel '${match.name}' (${match.subscriberId})`);
+      } else {
+        logMessage(serverless, `Creating sentinel '${sentinel.name}'`);
+      }
+    }
+  }
+
+  async deployFunctions() {
     const client = getAutotaskClient();
     const existing = await client.list().then(r => r.items);
     const functions = serverless.service.functions;
@@ -31,6 +45,13 @@ class DefenderDeploy {
         logMessage(serverless, `Created autotask '${match.name}' (${autotask.autotaskId})`);
       }
     }
+  }
+
+  async deploy() {
+    const serverless = this.serverless;
+    logMessage(serverless, 'Running Defender Deploy');
+    // await this.deployFunctions();
+    await this.deploySentinels();
   }
 }
 

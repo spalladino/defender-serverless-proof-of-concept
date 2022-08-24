@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "defender-autotask-client": "^1.25.0"
+    "defender-autotask-client": "^1.25.0",
+    "defender-sentinel-client": "^1.28.1"
   }
 }

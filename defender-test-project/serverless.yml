@@ -11,6 +11,14 @@ functions:
     name: 'Hello world from serverless'
     path: './hello-world'
 
+resources:
+  sentinels:
+    hello-monitor:
+      name: 'Monitor greeter contract'
+      network: rinkeby
+
+
+
 plugins:
   - ../defender-serverless
 
